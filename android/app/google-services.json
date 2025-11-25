@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "346912461759",
+    "project_id": "rentalpssandibuana",
+    "storage_bucket": "rentalpssandibuana.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:346912461759:android:a375b4ff6a50ee17b3070a",
+        "android_client_info": {
+          "package_name": "com.sandibuana.rental.rentalps"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDibCfoxtp8lBm_35zd3zpy-RnXTk-4t8g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
