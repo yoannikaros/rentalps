@@ -8,6 +8,7 @@ import 'console_type_management_screen.dart';
 import 'monthly_report_screen.dart';
 import 'user_management_screen.dart';
 import 'rental_dashboard.dart';
+import '../widgets/change_password_dialog.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -60,6 +61,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         builder: (context) => const RentalDashboard(),
                       ),
                     );
+                  } else if (value == 'change_password') {
+                    _showChangePasswordDialog(context);
                   }
                 },
                 itemBuilder:
@@ -71,6 +74,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
                             Icon(Icons.videogame_asset),
                             SizedBox(width: 8),
                             Text('Mode Rental'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'change_password',
+                        child: Row(
+                          children: [
+                            Icon(Icons.lock_outline),
+                            SizedBox(width: 8),
+                            Text('Ubah Password'),
                           ],
                         ),
                       ),
@@ -452,10 +465,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           contentPadding: EdgeInsets.zero,
           leading: CircleAvatar(
             backgroundColor: Colors.green[100],
-            child: Icon(
-              Icons.play_arrow,
-              color: Colors.green[700],
-            ),
+            child: Icon(Icons.play_arrow, color: Colors.green[700]),
           ),
           title: Text(console?.name ?? 'Unknown Console'),
           subtitle: Text(
@@ -480,10 +490,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           contentPadding: EdgeInsets.zero,
           leading: CircleAvatar(
             backgroundColor: Colors.grey[100],
-            child: Icon(
-              Icons.check_circle,
-              color: Colors.grey[700],
-            ),
+            child: Icon(Icons.check_circle, color: Colors.grey[700]),
           ),
           title: Text(consoleName),
           subtitle: Text(
@@ -607,6 +614,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ),
             ],
           ),
+    );
+  }
+
+  void _showChangePasswordDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => const ChangePasswordDialog(),
     );
   }
 }

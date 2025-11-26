@@ -5,10 +5,12 @@ import '../providers/auth_provider.dart';
 import '../models/console_with_type.dart';
 import '../widgets/console_card.dart';
 import '../widgets/start_session_dialog.dart';
+import '../widgets/change_password_dialog.dart';
 import '../services/bluetooth_printer_service.dart';
 import 'console_management_screen.dart';
 import 'console_type_management_screen.dart';
 import 'monthly_report_screen.dart';
+import 'admin_dashboard.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_of_service_screen.dart';
 import 'auth_wrapper.dart';
@@ -49,6 +51,16 @@ class _RentalDashboardState extends State<RentalDashboard> {
                 icon: const Icon(Icons.more_vert, color: Colors.white),
                 onSelected: (value) {
                   switch (value) {
+                    case 'admin_dashboard':
+                      if (authProvider.isAdmin) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AdminDashboard(),
+                          ),
+                        );
+                      }
+                      break;
                     case 'console_management':
                       if (authProvider.isAdmin) {
                         Navigator.push(
@@ -98,6 +110,9 @@ class _RentalDashboardState extends State<RentalDashboard> {
                         ),
                       );
                       break;
+                    case 'change_password':
+                      _showChangePasswordDialog(context);
+                      break;
                     case 'logout':
                       _showLogoutDialog(context, authProvider);
                       break;
@@ -109,6 +124,16 @@ class _RentalDashboardState extends State<RentalDashboard> {
                   // Admin-only options
                   if (authProvider.isAdmin) {
                     items.addAll([
+                      const PopupMenuItem(
+                        value: 'admin_dashboard',
+                        child: Row(
+                          children: [
+                            Icon(Icons.dashboard),
+                            SizedBox(width: 8),
+                            Text('Dashboard Admin'),
+                          ],
+                        ),
+                      ),
                       const PopupMenuItem(
                         value: 'console_management',
                         child: Row(
@@ -162,6 +187,16 @@ class _RentalDashboardState extends State<RentalDashboard> {
                           Icon(Icons.description),
                           SizedBox(width: 8),
                           Text('Terms of Service'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'change_password',
+                      child: Row(
+                        children: [
+                          Icon(Icons.lock_outline),
+                          SizedBox(width: 8),
+                          Text('Ubah Password'),
                         ],
                       ),
                     ),
@@ -892,6 +927,13 @@ class _RentalDashboardState extends State<RentalDashboard> {
               ),
             ],
           ),
+    );
+  }
+
+  void _showChangePasswordDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => const ChangePasswordDialog(),
     );
   }
 }
