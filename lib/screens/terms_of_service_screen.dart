@@ -22,13 +22,13 @@ class TermsOfServiceScreen extends StatelessWidget {
             const SizedBox(height: 16),
             _buildSection(
               'Acceptance of Terms',
-              'By downloading, installing, or using the Rental PS application ("the App"), '
+              'By downloading, installing, or using the PS RENTX PRO application ("the App"), '
                   'you agree to be bound by these Terms of Service ("Terms"). '
                   'If you do not agree to these Terms, please do not use the App.',
             ),
             _buildSection(
               'Description of Service',
-              'Rental PS is a mobile application designed for managing video game console rentals. '
+              'PS RENTX PRO is a mobile application designed for managing video game console rentals. '
                   'The app allows users to:\n\n'
                   '• Track console rentals and transactions\n'
                   '• Generate rental reports\n'
@@ -38,7 +38,7 @@ class TermsOfServiceScreen extends StatelessWidget {
             ),
             _buildSection(
               'User Responsibilities',
-              'As a user of the Rental PS app, you agree to:\n\n'
+              'As a user of the PS RENTX PRO app, you agree to:\n\n'
                   '• Use the app for lawful purposes only\n'
                   '• Maintain accurate rental records\n'
                   '• Ensure proper handling of rented equipment\n'
@@ -62,7 +62,7 @@ class TermsOfServiceScreen extends StatelessWidget {
             ),
             _buildSection(
               'Limitation of Liability',
-              'The Rental PS app is provided "as is" without warranties of any kind. '
+              'The PS RENTX PRO app is provided "as is" without warranties of any kind. '
                   'In no event shall the app developers be liable for:\n\n'
                   '• Any indirect, incidental, or consequential damages\n'
                   '• Loss of data or business interruption\n'
@@ -99,7 +99,7 @@ class TermsOfServiceScreen extends StatelessWidget {
             _buildSection(
               'Contact Information',
               'If you have any questions about these Terms of Service, please contact us:\n\n'
-                  '• Application: Rental PS\n'
+                  '• Application: PS RENTX PRO\n'
                   '• Platform: Android',
             ),
             const SizedBox(height: 24),

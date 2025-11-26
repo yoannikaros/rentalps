@@ -2,7 +2,17 @@
   "permissions": {
     "allow": [
       "Bash(flutter pub get:*)",
-      "Bash(flutter analyze:*)"
+      "Bash(flutter analyze:*)",
+      "Bash(flutter pub:*)",
+      "Bash(flutter clean:*)",
+      "Bash(flutter run:*)",
+      "Bash(openssl:*)",
+      "Bash(flutter doctor:*)",
+      "Bash(dart test:*)",
+      "Bash(dart fix_admin.dart:*)",
+      "Bash(adb shell:*)",
+      "Bash(clear:*)",
+      "Bash(dart run fix_admin:*)"
     ],
     "deny": [],
     "ask": []

@@ -22,7 +22,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
             const SizedBox(height: 16),
             _buildSection(
               'Information We Collect',
-              'Our Rental PS application may collect the following information:\n\n'
+              'Our PS RENTX PRO application may collect the following information:\n\n'
                   '• Console rental data (console type, rental time, duration)\n'
                   '• Transaction information (payment amount, rental periods)\n'
                   '• Device information for Bluetooth connectivity\n'
@@ -75,7 +75,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
             _buildSection(
               'Contact Us',
               'If you have any questions about this Privacy Policy, please contact us:\n\n'
-                  '• Application: Rental PS\n'
+                  '• Application: PS RENTX PRO\n'
                   '• Platform: Android',
             ),
             const SizedBox(height: 24),

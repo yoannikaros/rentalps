@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/rental_provider.dart';
+import '../providers/auth_provider.dart';
 import '../models/console_with_type.dart';
 import '../widgets/console_card.dart';
 import '../widgets/start_session_dialog.dart';
@@ -10,120 +11,177 @@ import 'console_type_management_screen.dart';
 import 'monthly_report_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_of_service_screen.dart';
+import 'auth_wrapper.dart';
 
-class RentalDashboard extends StatelessWidget {
+class RentalDashboard extends StatefulWidget {
   const RentalDashboard({super.key});
 
+  @override
+  State<RentalDashboard> createState() => _RentalDashboardState();
+}
+
+class _RentalDashboardState extends State<RentalDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'RENTAL PS',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        title: Consumer<AuthProvider>(
+          builder: (context, authProvider, child) {
+            String title = 'PS RENTX PRO';
+            if (authProvider.currentUser != null) {
+              title = 'PS RENTX PRO - ${authProvider.currentUser!.fullName}';
+            }
+            return Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            );
+          },
         ),
         backgroundColor: Colors.blue[700],
         elevation: 0,
         actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.settings, color: Colors.white),
-            onSelected: (value) {
-              switch (value) {
-                case 'console_management':
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ConsoleManagementScreen(),
+          Consumer<AuthProvider>(
+            builder: (context, authProvider, child) {
+              return PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert, color: Colors.white),
+                onSelected: (value) {
+                  switch (value) {
+                    case 'console_management':
+                      if (authProvider.isAdmin) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => const ConsoleManagementScreen(),
+                          ),
+                        );
+                      }
+                      break;
+                    case 'console_type_management':
+                      if (authProvider.isAdmin) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) =>
+                                    const ConsoleTypeManagementScreen(),
+                          ),
+                        );
+                      }
+                      break;
+                    case 'monthly_report':
+                      if (authProvider.isAdmin) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const MonthlyReportScreen(),
+                          ),
+                        );
+                      }
+                      break;
+                    case 'privacy_policy':
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PrivacyPolicyScreen(),
+                        ),
+                      );
+                      break;
+                    case 'terms_of_service':
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TermsOfServiceScreen(),
+                        ),
+                      );
+                      break;
+                    case 'logout':
+                      _showLogoutDialog(context, authProvider);
+                      break;
+                  }
+                },
+                itemBuilder: (context) {
+                  List<PopupMenuEntry<String>> items = [];
+
+                  // Admin-only options
+                  if (authProvider.isAdmin) {
+                    items.addAll([
+                      const PopupMenuItem(
+                        value: 'console_management',
+                        child: Row(
+                          children: [
+                            Icon(Icons.gamepad),
+                            SizedBox(width: 8),
+                            Text('Kelola Konsol'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'console_type_management',
+                        child: Row(
+                          children: [
+                            Icon(Icons.category),
+                            SizedBox(width: 8),
+                            Text('Kelola Tipe Konsol'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'monthly_report',
+                        child: Row(
+                          children: [
+                            Icon(Icons.bar_chart),
+                            SizedBox(width: 8),
+                            Text('Laporan Bulanan'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuDivider(),
+                    ]);
+                  }
+
+                  // General options
+                  items.addAll([
+                    const PopupMenuItem(
+                      value: 'privacy_policy',
+                      child: Row(
+                        children: [
+                          Icon(Icons.privacy_tip),
+                          SizedBox(width: 8),
+                          Text('Privacy Policy'),
+                        ],
+                      ),
                     ),
-                  );
-                  break;
-                case 'console_type_management':
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ConsoleTypeManagementScreen(),
+                    const PopupMenuItem(
+                      value: 'terms_of_service',
+                      child: Row(
+                        children: [
+                          Icon(Icons.description),
+                          SizedBox(width: 8),
+                          Text('Terms of Service'),
+                        ],
+                      ),
                     ),
-                  );
-                  break;
-                case 'monthly_report':
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MonthlyReportScreen(),
+                    const PopupMenuDivider(),
+                    PopupMenuItem(
+                      value: 'logout',
+                      child: Row(
+                        children: [
+                          Icon(Icons.logout, color: Colors.red),
+                          SizedBox(width: 8),
+                          Text('Logout', style: TextStyle(color: Colors.red)),
+                        ],
+                      ),
                     ),
-                  );
-                  break;
-                case 'privacy_policy':
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const PrivacyPolicyScreen(),
-                    ),
-                  );
-                  break;
-                case 'terms_of_service':
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TermsOfServiceScreen(),
-                    ),
-                  );
-                  break;
-              }
+                  ]);
+
+                  return items;
+                },
+              );
             },
-            itemBuilder:
-                (context) => [
-                  const PopupMenuItem(
-                    value: 'console_management',
-                    child: Row(
-                      children: [
-                        Icon(Icons.gamepad),
-                        SizedBox(width: 8),
-                        Text('Kelola Konsol'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'console_type_management',
-                    child: Row(
-                      children: [
-                        Icon(Icons.category),
-                        SizedBox(width: 8),
-                        Text('Kelola Tipe Konsol'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'monthly_report',
-                    child: Row(
-                      children: [
-                        Icon(Icons.bar_chart),
-                        SizedBox(width: 8),
-                        Text('Laporan Bulanan'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'privacy_policy',
-                    child: Row(
-                      children: [
-                        Icon(Icons.privacy_tip),
-                        SizedBox(width: 8),
-                        Text('Privacy Policy'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'terms_of_service',
-                    child: Row(
-                      children: [
-                        Icon(Icons.description),
-                        SizedBox(width: 8),
-                        Text('Terms of Service'),
-                      ],
-                    ),
-                  ),
-                ],
           ),
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
@@ -756,6 +814,81 @@ class RentalDashboard extends StatelessWidget {
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: const Text('OK'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context, AuthProvider authProvider) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Logout'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Apakah Anda yakin ingin keluar?'),
+                const SizedBox(height: 16),
+                Consumer<AuthProvider>(
+                  builder: (context, authProvider, child) {
+                    if (authProvider.currentUser != null) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'User: ${authProvider.currentUser!.fullName}',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            'Role: ${authProvider.currentUser!.role.displayName}',
+                          ),
+                        ],
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Batal'),
+              ),
+              Consumer<AuthProvider>(
+                builder: (context, authProvider, child) {
+                  return ElevatedButton(
+                    onPressed:
+                        authProvider.isLoading
+                            ? null
+                            : () async {
+                              await authProvider.logout();
+                              if (context.mounted) {
+                                Navigator.of(context).pushAndRemoveUntil(
+                                  MaterialPageRoute(
+                                    builder: (context) => const AuthWrapper(),
+                                  ),
+                                  (route) => false,
+                                );
+                              }
+                            },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                    ),
+                    child:
+                        authProvider.isLoading
+                            ? const SizedBox(
+                              height: 16,
+                              width: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                            : const Text('Logout'),
+                  );
+                },
               ),
             ],
           ),

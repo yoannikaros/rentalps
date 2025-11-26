@@ -22,14 +22,17 @@ class PdfService {
 
     for (var sessionData in sessionDetails) {
       final session = sessionData['session'] as Session;
-      
+
       // Include extended cost in total revenue
-      final totalExtendedCost = sessionData['totalExtendedCost'] as double? ?? 0.0;
+      final totalExtendedCost =
+          sessionData['totalExtendedCost'] as double? ?? 0.0;
       totalRevenue += session.totalCost + totalExtendedCost;
-      
+
       // Include extended time in total duration
-      final actualMinutes = session.actualDurationMinutes ?? session.durationMinutes;
-      final totalExtendedMinutes = sessionData['totalExtendedMinutes'] as int? ?? 0;
+      final actualMinutes =
+          session.actualDurationMinutes ?? session.durationMinutes;
+      final totalExtendedMinutes =
+          sessionData['totalExtendedMinutes'] as int? ?? 0;
       totalDuration += actualMinutes + totalExtendedMinutes;
     }
 
@@ -52,15 +55,15 @@ class PdfService {
             // Header
             _buildHeader(monthName, year),
             pw.SizedBox(height: 20),
-            
+
             // Summary Cards
             _buildSummarySection(totalRevenue, totalSessions, totalDuration),
             pw.SizedBox(height: 30),
-            
+
             // Console Performance
             _buildConsolePerformance(sessionsByConsole),
             pw.SizedBox(height: 30),
-            
+
             // Session Details Table
             _buildSessionTable(sessionDetails),
           ];
@@ -97,10 +100,7 @@ class PdfService {
               pw.SizedBox(height: 5),
               pw.Text(
                 '$monthName $year',
-                style: pw.TextStyle(
-                  color: PdfColors.white,
-                  fontSize: 18,
-                ),
+                style: pw.TextStyle(color: PdfColors.white, fontSize: 18),
               ),
             ],
           ),
@@ -108,7 +108,7 @@ class PdfService {
             crossAxisAlignment: pw.CrossAxisAlignment.end,
             children: [
               pw.Text(
-                'Rental PS',
+                'PS RENTX PRO',
                 style: pw.TextStyle(
                   color: PdfColors.white,
                   fontSize: 16,
@@ -117,10 +117,7 @@ class PdfService {
               ),
               pw.Text(
                 'Generated: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
-                style: const pw.TextStyle(
-                  color: PdfColors.white,
-                  fontSize: 10,
-                ),
+                style: const pw.TextStyle(color: PdfColors.white, fontSize: 10),
               ),
             ],
           ),
@@ -129,7 +126,11 @@ class PdfService {
     );
   }
 
-  static pw.Widget _buildSummarySection(double totalRevenue, int totalSessions, int totalDuration) {
+  static pw.Widget _buildSummarySection(
+    double totalRevenue,
+    int totalSessions,
+    int totalDuration,
+  ) {
     return pw.Row(
       children: [
         pw.Expanded(
@@ -159,7 +160,11 @@ class PdfService {
     );
   }
 
-  static pw.Widget _buildSummaryCard(String title, String value, PdfColor color) {
+  static pw.Widget _buildSummaryCard(
+    String title,
+    String value,
+    PdfColor color,
+  ) {
     return pw.Container(
       padding: const pw.EdgeInsets.all(16),
       decoration: pw.BoxDecoration(
@@ -192,7 +197,9 @@ class PdfService {
     );
   }
 
-  static pw.Widget _buildConsolePerformance(Map<String, List<Map<String, dynamic>>> sessionsByConsole) {
+  static pw.Widget _buildConsolePerformance(
+    Map<String, List<Map<String, dynamic>>> sessionsByConsole,
+  ) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -210,9 +217,7 @@ class PdfService {
           children: [
             // Header
             pw.TableRow(
-              decoration: const pw.BoxDecoration(
-                color: PdfColors.grey100,
-              ),
+              decoration: const pw.BoxDecoration(color: PdfColors.grey100),
               children: [
                 _buildTableCell('Tipe Konsol', isHeader: true),
                 _buildTableCell('Jumlah Sesi', isHeader: true),
@@ -225,19 +230,22 @@ class PdfService {
               final consoleType = entry.key;
               final sessions = entry.value;
               final sessionCount = sessions.length;
-              
+
               // Calculate total duration including extended time
               final totalDuration = sessions.fold<int>(0, (sum, sessionData) {
                 final session = sessionData['session'] as Session;
-                final actualMinutes = session.actualDurationMinutes ?? session.durationMinutes;
-                final totalExtendedMinutes = sessionData['totalExtendedMinutes'] as int? ?? 0;
+                final actualMinutes =
+                    session.actualDurationMinutes ?? session.durationMinutes;
+                final totalExtendedMinutes =
+                    sessionData['totalExtendedMinutes'] as int? ?? 0;
                 return sum + actualMinutes + totalExtendedMinutes;
               });
-              
+
               // Calculate total revenue including extended costs
               final totalRevenue = sessions.fold<double>(0, (sum, sessionData) {
                 final session = sessionData['session'] as Session;
-                final totalExtendedCost = sessionData['totalExtendedCost'] as double? ?? 0.0;
+                final totalExtendedCost =
+                    sessionData['totalExtendedCost'] as double? ?? 0.0;
                 return sum + session.totalCost + totalExtendedCost;
               });
 
@@ -256,7 +264,9 @@ class PdfService {
     );
   }
 
-  static pw.Widget _buildSessionTable(List<Map<String, dynamic>> sessionDetails) {
+  static pw.Widget _buildSessionTable(
+    List<Map<String, dynamic>> sessionDetails,
+  ) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -282,9 +292,7 @@ class PdfService {
           children: [
             // Header
             pw.TableRow(
-              decoration: const pw.BoxDecoration(
-                color: PdfColors.grey100,
-              ),
+              decoration: const pw.BoxDecoration(color: PdfColors.grey100),
               children: [
                 _buildTableCell('Tanggal & Waktu', isHeader: true),
                 _buildTableCell('Konsol', isHeader: true),
@@ -299,24 +307,30 @@ class PdfService {
               final session = sessionData['session'] as Session;
               final consoleType = sessionData['consoleTypeName'] as String;
               final extensionCount = sessionData['extensionCount'] as int? ?? 0;
-              final totalExtendedMinutes = sessionData['totalExtendedMinutes'] as int? ?? 0;
-              final totalExtendedCost = sessionData['totalExtendedCost'] as double? ?? 0.0;
-              
+              final totalExtendedMinutes =
+                  sessionData['totalExtendedMinutes'] as int? ?? 0;
+              final totalExtendedCost =
+                  sessionData['totalExtendedCost'] as double? ?? 0.0;
+
               // Use actual duration which includes extended time
-              final actualMinutes = session.actualDurationMinutes ?? session.durationMinutes;
-              
+              final actualMinutes =
+                  session.actualDurationMinutes ?? session.durationMinutes;
+
               // Format extension info
-              String extensionInfo = extensionCount > 0 
-                  ? '${extensionCount}x (${_formatDuration(totalExtendedMinutes)})'
-                  : '-';
-              
+              String extensionInfo =
+                  extensionCount > 0
+                      ? '${extensionCount}x (${_formatDuration(totalExtendedMinutes)})'
+                      : '-';
+
               return pw.TableRow(
                 children: [
                   _buildTableCell(_formatDateTime(session.startTime)),
                   _buildTableCell(consoleType),
                   _buildTableCell(_formatDuration(actualMinutes)),
                   _buildTableCell(extensionInfo),
-                  _buildTableCell(_formatCurrency(session.totalCost + totalExtendedCost)),
+                  _buildTableCell(
+                    _formatCurrency(session.totalCost + totalExtendedCost),
+                  ),
                   _buildTableCell(session.isActive ? 'Aktif' : 'Selesai'),
                 ],
               );
@@ -363,7 +377,10 @@ class PdfService {
     return DateFormat('dd/MM/yyyy HH:mm').format(dateTime);
   }
 
-  static Future<String> savePdfToFile(Uint8List pdfBytes, String fileName) async {
+  static Future<String> savePdfToFile(
+    Uint8List pdfBytes,
+    String fileName,
+  ) async {
     final directory = await getApplicationDocumentsDirectory();
     final file = File('${directory.path}/$fileName');
     await file.writeAsBytes(pdfBytes);
@@ -387,12 +404,9 @@ class PdfService {
       final directory = await getTemporaryDirectory();
       final file = File('${directory.path}/$fileName');
       await file.writeAsBytes(pdfBytes);
-      
+
       // Share the file
-      await Printing.sharePdf(
-        bytes: pdfBytes,
-        filename: fileName,
-      );
+      await Printing.sharePdf(bytes: pdfBytes, filename: fileName);
     } catch (e) {
       debugPrint('Error sharing PDF: $e');
       rethrow;

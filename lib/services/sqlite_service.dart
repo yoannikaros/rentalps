@@ -152,6 +152,14 @@ class SQLiteService {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getRecentCompletedSessions({int limit = 5}) async {
+    try {
+      return await _databaseHelper.getRecentCompletedSessions(limit: limit);
+    } catch (e) {
+      throw Exception('Error getting recent completed sessions: $e');
+    }
+  }
+
   Future<void> updateSession(Session session) async {
     try {
       await _databaseHelper.updateSession(session);

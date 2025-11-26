@@ -23,7 +23,7 @@
         android:required="false" />
     
     <application
-        android:label="Rental PS"
+        android:label="PS RENTX PRO"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

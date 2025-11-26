@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'providers/rental_provider.dart';
-import 'screens/rental_dashboard.dart';
+import 'providers/auth_provider.dart';
+import 'screens/auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,8 +52,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => RentalProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AuthProvider()),
+        ChangeNotifierProvider(create: (context) => RentalProvider()),
+      ],
       child: MaterialApp(
         title: 'RentalPS',
         theme: ThemeData(
@@ -77,7 +81,7 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        home: const RentalDashboard(),
+        home: const AuthWrapper(),
         debugShowCheckedModeBanner: false,
       ),
     );

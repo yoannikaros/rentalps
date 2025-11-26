@@ -5,6 +5,8 @@ import '../models/console.dart';
 import '../models/session.dart';
 import '../models/console_type.dart';
 import '../models/session_extension.dart';
+import '../models/user.dart';
+import '../services/auth_service.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -23,8 +25,9 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'rentalps.db');
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -86,8 +89,76 @@ class DatabaseHelper {
       )
     ''');
 
+    // Create users table
+    await db.execute('''
+      CREATE TABLE users(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        email TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL,
+        full_name TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'employee',
+        created_at INTEGER NOT NULL,
+        last_login_at INTEGER,
+        is_active INTEGER NOT NULL DEFAULT 1
+      )
+    ''');
+
     // Insert default console types and consoles
     await _insertDefaultData(db);
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 3) {
+      // Create users table for authentication
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS users(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT NOT NULL UNIQUE,
+          email TEXT NOT NULL UNIQUE,
+          password_hash TEXT NOT NULL,
+          full_name TEXT NOT NULL,
+          role TEXT NOT NULL DEFAULT 'employee',
+          created_at INTEGER NOT NULL,
+          last_login_at INTEGER,
+          is_active INTEGER NOT NULL DEFAULT 1
+        )
+      ''');
+
+      // Insert default admin user
+      await _insertDefaultAdmin(db);
+    }
+  }
+
+  Future<void> _insertDefaultAdmin(Database db) async {
+    // Insert default admin user (password: admin123)
+    final defaultAdmin = {
+      'username': 'admin',
+      'email': 'admin@rentalps.com',
+      'password_hash': 'admin123', // Plain text password
+      'full_name': 'Administrator',
+      'role': 'admin',
+      'created_at': DateTime.now().millisecondsSinceEpoch,
+      'last_login_at': null,
+      'is_active': 1,
+    };
+
+    try {
+      await db.insert('users', defaultAdmin);
+    } catch (e) {
+      // Admin user might already exist, update the password to plain text
+      try {
+        await db.update(
+          'users',
+          {'password_hash': 'admin123'}, // Update to plain text password
+          where: 'username = ?',
+          whereArgs: ['admin'],
+        );
+        print('Updated admin password to plain text');
+      } catch (updateError) {
+        print('Failed to update admin password: $updateError');
+      }
+    }
   }
 
   Future<void> _insertDefaultData(Database db) async {
@@ -264,6 +335,24 @@ class DatabaseHelper {
       where: 'is_active = 1',
     );
     return List.generate(maps.length, (i) => Session.fromMap(maps[i]));
+  }
+
+  Future<List<Map<String, dynamic>>> getRecentCompletedSessions({int limit = 5}) async {
+    final db = await database;
+    return await db.rawQuery('''
+      SELECT
+        s.*,
+        c.name as console_name,
+        ct.name as console_type_name,
+        ct.color_code
+      FROM sessions s
+      JOIN consoles c ON s.console_id = c.id
+      JOIN console_types ct ON c.console_type_id = ct.id
+      WHERE s.is_active = 0
+        AND s.end_time IS NOT NULL
+      ORDER BY s.end_time DESC
+      LIMIT ?
+    ''', [limit]);
   }
 
   Future<int> updateSession(Session session) async {
@@ -489,6 +578,159 @@ class DatabaseHelper {
     }
 
     return result;
+  }
+
+  // User operations
+  Future<int> insertUser(User user) async {
+    final db = await database;
+    return await db.insert('users', user.toMap());
+  }
+
+  Future<User?> getUserByUsername(String username) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: 'username = ? AND is_active = 1',
+      whereArgs: [username],
+    );
+    if (maps.isNotEmpty) {
+      return User.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  Future<User?> getUserByEmail(String email) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: 'email = ? AND is_active = 1',
+      whereArgs: [email],
+    );
+    if (maps.isNotEmpty) {
+      return User.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  Future<User?> getUserById(int id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: 'id = ? AND is_active = 1',
+      whereArgs: [id],
+    );
+    if (maps.isNotEmpty) {
+      return User.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  Future<List<User>> getAllUsers() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: 'is_active = 1',
+      orderBy: 'created_at DESC',
+    );
+    return List.generate(maps.length, (i) => User.fromMap(maps[i]));
+  }
+
+  Future<int> updateUser(User user) async {
+    final db = await database;
+    return await db.update(
+      'users',
+      user.toMap(),
+      where: 'id = ?',
+      whereArgs: [user.id],
+    );
+  }
+
+  Future<int> updateUserLastLogin(int userId) async {
+    final db = await database;
+    return await db.update(
+      'users',
+      {'last_login_at': DateTime.now().millisecondsSinceEpoch},
+      where: 'id = ?',
+      whereArgs: [userId],
+    );
+  }
+
+  Future<int> deactivateUser(int userId) async {
+    final db = await database;
+    return await db.update(
+      'users',
+      {'is_active': 0},
+      where: 'id = ?',
+      whereArgs: [userId],
+    );
+  }
+
+  Future<int> deleteUser(int userId) async {
+    final db = await database;
+    return await db.delete(
+      'users',
+      where: 'id = ?',
+      whereArgs: [userId],
+    );
+  }
+
+  Future<bool> authenticateUser(String username, String password) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: '(username = ? OR email = ?) AND is_active = 1',
+      whereArgs: [username, username],
+    );
+
+    if (maps.isEmpty) {
+      return false;
+    }
+
+    final user = User.fromMap(maps.first);
+    return AuthService.verifyPassword(password, user.passwordHash);
+  }
+
+  Future<User?> authenticateAndGetUser(String username, String password) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: '(username = ? OR email = ?) AND is_active = 1',
+      whereArgs: [username, username],
+    );
+
+    if (maps.isEmpty) {
+      return null;
+    }
+
+    final user = User.fromMap(maps.first);
+
+    if (AuthService.verifyPassword(password, user.passwordHash)) {
+      // Update last login time
+      await updateUserLastLogin(user.id!);
+      return user;
+    }
+
+    return null;
+  }
+
+  Future<bool> isUsernameExists(String username) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: 'username = ?',
+      whereArgs: [username],
+    );
+    return maps.isNotEmpty;
+  }
+
+  Future<bool> isEmailExists(String email) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: 'email = ?',
+      whereArgs: [email],
+    );
+    return maps.isNotEmpty;
   }
 
   Future<void> close() async {

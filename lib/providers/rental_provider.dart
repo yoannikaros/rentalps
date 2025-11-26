@@ -14,11 +14,13 @@ class RentalProvider with ChangeNotifier {
   final NotificationService _notificationService = NotificationService();
   List<ConsoleWithType> _consoles = [];
   List<Session> _activeSessions = [];
+  List<Map<String, dynamic>> _recentCompletedSessions = [];
   Timer? _timer;
   final Set<int> _expiredSessionsPlayedMusic = <int>{}; // Track which sessions have played music
 
   List<ConsoleWithType> get consoles => _consoles;
   List<Session> get activeSessions => _activeSessions;
+  List<Map<String, dynamic>> get recentCompletedSessions => _recentCompletedSessions;
 
   RentalProvider() {
     _initializeData();
@@ -37,6 +39,7 @@ class RentalProvider with ChangeNotifier {
   Future<void> _initializeData() async {
     await loadConsoles();
     await loadActiveSessions();
+    await loadRecentCompletedSessions();
   }
 
   Future<void> _initializeNotifications() async {
@@ -73,6 +76,15 @@ class RentalProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading active sessions: $e');
+    }
+  }
+
+  Future<void> loadRecentCompletedSessions() async {
+    try {
+      _recentCompletedSessions = await _sqliteService.getRecentCompletedSessions(limit: 3);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading recent completed sessions: $e');
     }
   }
 
@@ -119,6 +131,7 @@ class RentalProvider with ChangeNotifier {
 
       await loadConsoles();
       await loadActiveSessions();
+      await loadRecentCompletedSessions();
 
       return true;
     } catch (e) {
@@ -234,6 +247,7 @@ class RentalProvider with ChangeNotifier {
 
       await loadConsoles();
       await loadActiveSessions();
+      await loadRecentCompletedSessions();
 
       return true;
     } catch (e) {

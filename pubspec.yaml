@@ -72,6 +72,12 @@ dependencies:
   printing: ^5.13.2
   path_provider: ^2.1.4
 
+  # Authentication and security
+  # crypto: ^3.0.3 # Removed - using plain text authentication
+  # For form validation
+  flutter_form_builder: ^9.3.0
+  form_builder_validators: ^10.0.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
